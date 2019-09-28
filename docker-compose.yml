@@ -1,0 +1,30 @@
+version: '3'
+services:
+ service-registry:
+   image: discovery-service
+   ports:
+    - 8761:8761
+ authorization-service:
+   image: authorization-service
+   ports:
+    - 9999:9999
+   links:
+    - discovery-service
+    - authorization-service-db
+ authorization-service-db:
+   image: mysql:latest
+   container_name: auth-service-mysql-container
+   ports:
+    - "3306:3306"
+   restart: on-failure
+   volumes:
+    -  auth-service-volume:/var/lib/mysql
+   environment:
+    - MYSQL_ROOT_PASSWORD=root123
+    - MYSQL_USER=root
+    - MYSQL_PASSWORD=root123
+    - MYSQL_DATABASE=auth-service
+ volumes:
+   authorization-service-volume: 
+     external:
+       name: authorization-service-volume
