@@ -1,30 +1,37 @@
-version: '3'
+version: "3.6"
 services:
- service-registry:
-   image: discovery-service
+ registry:
+   image: registry
+   networks:
+    - isolated_nw
+ user-service:
+   image: userservice
    ports:
-    - 8761:8761
- authorization-service:
-   image: authorization-service
-   ports:
-    - 9999:9999
-   links:
-    - discovery-service
-    - authorization-service-db
- authorization-service-db:
+    - 9001:9001
+   networks:
+    - isolated_nw
+ userdb:
    image: mysql:latest
-   container_name: auth-service-mysql-container
+   container_name: userdb
    ports:
     - "3306:3306"
    restart: on-failure
    volumes:
-    -  auth-service-volume:/var/lib/mysql
+    -  mysqldatavolume:/var/lib/mysql
    environment:
     - MYSQL_ROOT_PASSWORD=root123
     - MYSQL_USER=root
     - MYSQL_PASSWORD=root123
-    - MYSQL_DATABASE=auth-service
- volumes:
-   authorization-service-volume: 
-     external:
-       name: authorization-service-volume
+    - MYSQL_DATABASE=yorbit
+   networks:
+     isolated_nw:
+       ipv4_address: 172.25.3.3
+volumes:
+  mysqldatavolume: 
+    external:
+      name: mysqldatavolume
+networks:
+  isolated_nw:
+    external:
+      name: isolated_nw
+      
